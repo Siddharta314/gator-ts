@@ -58,3 +58,5 @@ const ConfigMapper = {
     };
   },
 };
+
+export const config = readConfig();

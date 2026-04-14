@@ -3,7 +3,9 @@ import {
   createUser,
   getUserByName,
   deleteAllUsers,
+  getUsers,
 } from "./db/queries/users.js";
+import { config } from "./config.js";
 
 export type CommandHandler = (
   cmdName: string,
@@ -51,6 +53,14 @@ export function registerCommand(
   handler: CommandHandler,
 ) {
   registry[cmdName] = handler;
+}
+
+export async function handlerListUsers(cmd: string, ...args: string[]) {
+  const users = await getUsers();
+  for (const user of users) {
+    const current = user.name === config.currentUserName ? " (current)" : "";
+    console.log(`  ${user.name}${current}`);
+  }
 }
 
 export async function runCommand(
