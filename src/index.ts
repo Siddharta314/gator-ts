@@ -5,7 +5,7 @@ import {
   runCommand,
 } from "./commands.js";
 
-function main() {
+async function main() {
   const commanderRegistry: CommandsRegistry = {};
   registerCommand(commanderRegistry, "login", handlerLogin);
 
@@ -16,7 +16,7 @@ function main() {
       throw new Error("not enough arguments were provided");
     }
     const [cmdName, ...cmdArgs] = args;
-    runCommand(commanderRegistry, cmdName, ...cmdArgs);
+    await runCommand(commanderRegistry, cmdName, ...cmdArgs);
   } catch (err) {
     if (err instanceof Error) {
       console.error(`Error: ${err.message}`);
