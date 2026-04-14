@@ -1,4 +1,5 @@
 import { setUser } from "./config.js";
+import { createUser, getUserByName } from "./db/queries/users.js";
 
 export type CommandHandler = (
   cmdName: string,
@@ -12,8 +13,27 @@ export async function handlerLogin(cmdName: string, ...args: string[]) {
     throw new Error("Usage: login <username>");
   }
   const newUser = args[0];
+  const user = await getUserByName(newUser);
+  if (!user) {
+    throw new Error("Username doesn't exist");
+  }
   setUser(newUser);
   console.log(`User set to: ${newUser}`);
+}
+
+export async function handlerRegister(cmdName: string, ...args: string[]) {
+  if (args.length !== 1) {
+    throw new Error("Usage: register <username>");
+  }
+  const newUser = args[0];
+  try {
+    const user = await createUser(newUser);
+    setUser(user.name);
+    console.log(`Registered user: ${user.name}`);
+    console.log(user);
+  } catch (err: any) {
+    throw new Error("failed to register user: " + newUser);
+  }
 }
 
 export function registerCommand(
@@ -24,7 +44,7 @@ export function registerCommand(
   registry[cmdName] = handler;
 }
 
-export function runCommand(
+export async function runCommand(
   registry: CommandsRegistry,
   cmdName: string,
   ...args: string[]
@@ -33,5 +53,5 @@ export function runCommand(
   if (!handler) {
     throw new Error(`Command ${cmdName} not found`);
   }
-  handler(cmdName, ...args);
+  await handler(cmdName, ...args);
 }
