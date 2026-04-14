@@ -29,12 +29,9 @@ function getConfigFilePath(): string {
 
 function writeConfig(cfg: Config): void {
   const config_path = getConfigFilePath();
-  const dataToSave = {
-    db_url: cfg.dbUrl,
-    current_user_name: cfg.currentUserName,
-  };
+  const data = ConfigMapper.toExternal(cfg);
 
-  fs.writeFileSync(config_path, JSON.stringify(dataToSave, null, 2));
+  fs.writeFileSync(config_path, JSON.stringify(data, null, 2));
 }
 
 function validateConfig(rawConfig: any): Config {
@@ -44,8 +41,20 @@ function validateConfig(rawConfig: any): Config {
   if (!rawConfig.db_url || typeof rawConfig.db_url !== "string") {
     throw new Error("Invalid dbUrl in config file");
   }
-  return {
-    dbUrl: rawConfig.db_url,
-    currentUserName: rawConfig.current_user_name || "",
-  } as Config;
+  return ConfigMapper.toInternal(rawConfig);
 }
+
+const ConfigMapper = {
+  toInternal(raw: any): Config {
+    return {
+      dbUrl: raw.db_url,
+      currentUserName: raw.current_user_name || "",
+    };
+  },
+  toExternal(cfg: Config) {
+    return {
+      db_url: cfg.dbUrl,
+      current_user_name: cfg.currentUserName,
+    };
+  },
+};
