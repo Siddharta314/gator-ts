@@ -1,5 +1,9 @@
 import { setUser } from "./config.js";
-import { createUser, getUserByName } from "./db/queries/users.js";
+import {
+  createUser,
+  getUserByName,
+  deleteAllUsers,
+} from "./db/queries/users.js";
 
 export type CommandHandler = (
   cmdName: string,
@@ -34,6 +38,11 @@ export async function handlerRegister(cmdName: string, ...args: string[]) {
   } catch (err: any) {
     throw new Error("failed to register user: " + newUser);
   }
+}
+
+export async function handlerReset(cmdName: string, ...args: string[]) {
+  await deleteAllUsers();
+  console.log("Delete all users in db");
 }
 
 export function registerCommand(
