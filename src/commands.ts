@@ -6,6 +6,7 @@ import {
   getUsers,
 } from "./db/queries/users.js";
 import { config } from "./config.js";
+import { fetchFeed } from "./rssfeed.js";
 
 export type CommandHandler = (
   cmdName: string,
@@ -61,6 +62,12 @@ export async function handlerListUsers(cmd: string, ...args: string[]) {
     const current = user.name === config.currentUserName ? " (current)" : "";
     console.log(`  ${user.name}${current}`);
   }
+}
+
+export async function handlerAgg(cmd: string, ...args: string[]) {
+  console.log("Fetching resource");
+  const rssFeed = await fetchFeed("https://www.wagslane.dev/index.xml");
+  console.log(JSON.stringify(rssFeed, null, 2));
 }
 
 export async function runCommand(

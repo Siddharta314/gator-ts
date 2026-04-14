@@ -6,6 +6,7 @@ import {
   handlerListUsers,
   registerCommand,
   runCommand,
+  handlerAgg,
 } from "./commands.js";
 
 async function main() {
@@ -14,9 +15,9 @@ async function main() {
   registerCommand(commanderRegistry, "register", handlerRegister);
   registerCommand(commanderRegistry, "reset", handlerReset);
   registerCommand(commanderRegistry, "users", handlerListUsers);
+  registerCommand(commanderRegistry, "agg", handlerAgg);
 
   const args = process.argv.slice(2);
-
   try {
     if (args.length === 0) {
       throw new Error("not enough arguments were provided");
