@@ -7,7 +7,9 @@
   "scripts": {
     "build": "tsc",
     "start": "tsc && node dist/index.js",
-    "dev": "tsx watch src/index.ts"
+    "dev": "tsx watch src/index.ts",
+    "generate": "drizzle-kit generate",
+    "migrate": "drizzle-kit migrate"
   },
   "keywords": [],
   "author": "",
@@ -15,7 +17,12 @@
   "packageManager": "pnpm@10.14.0",
   "devDependencies": {
     "@types/node": "25.5.2",
+    "drizzle-kit": "0.31.10",
     "tsx": "4.21.0",
     "typescript": "6.0.2"
+  },
+  "dependencies": {
+    "drizzle-orm": "0.45.2",
+    "postgres": "3.4.9"
   }
 }
