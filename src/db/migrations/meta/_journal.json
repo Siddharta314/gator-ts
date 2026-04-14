@@ -8,6 +8,13 @@
       "when": 1776160988585,
       "tag": "0000_bent_thor",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1776170493693,
+      "tag": "0001_loud_trauma",
+      "breakpoints": true
     }
   ]
 }
