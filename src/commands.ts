@@ -7,7 +7,12 @@ import {
 } from "./db/queries/users.js";
 import { config } from "./config.js";
 import { fetchFeed, printFeed } from "./rssfeed.js";
-import { createFeed, getFeedsWithUserName } from "./db/queries/feeds.js";
+import {
+  createFeed,
+  createFeedFollow,
+  getFeedByUrl,
+  getFeedsWithUserName,
+} from "./db/queries/feeds.js";
 
 export type CommandHandler = (
   cmdName: string,
@@ -96,6 +101,25 @@ export async function handlerListFeeds(cmd: string, ...args: string[]) {
     const feed = `${r.feeds.name} (${r.feeds.url})`;
     console.log(`${feed.padEnd(50)} - ${r.users.name}`);
   }
+}
+
+export async function handlerFeedFollow(cmd: string, ...args: string[]) {
+  if (args.length !== 1) {
+    throw new Error("Usage: follow <feedUrl>");
+  }
+  const feedUrl = args[0];
+  const user = await getUserByName(config.currentUserName);
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  const feed = await getFeedByUrl(feedUrl);
+  if (!feed) {
+    throw new Error("Feed not found");
+  }
+
+  const result = await createFeedFollow(feed.id, user.id);
+  console.log(`Followed ${result.feedName} by ${result.userName}`);
 }
 
 export async function runCommand(
