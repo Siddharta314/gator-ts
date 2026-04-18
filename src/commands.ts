@@ -6,7 +6,8 @@ import {
   getUsers,
 } from "./db/queries/users.js";
 import { config } from "./config.js";
-import { fetchFeed } from "./rssfeed.js";
+import { fetchFeed, printFeed } from "./rssfeed.js";
+import { createFeed } from "./db/queries/feeds.js";
 
 export type CommandHandler = (
   cmdName: string,
@@ -68,6 +69,20 @@ export async function handlerAgg(cmd: string, ...args: string[]) {
   console.log("Fetching resource");
   const rssFeed = await fetchFeed("https://www.wagslane.dev/index.xml");
   console.log(JSON.stringify(rssFeed, null, 2));
+}
+
+export async function handlerAddFeed(cmd: string, ...args: string[]) {
+  if (args.length !== 2) {
+    throw new Error("Usage: add-feed <name> <url>");
+  }
+  const currentUser = config.currentUserName;
+  const userDB = await getUserByName(currentUser);
+  if (!userDB) {
+    throw new Error("User not found");
+  }
+  const [feedName, feedUrl] = args;
+  const newFeed = await createFeed(feedName, feedUrl, userDB.id);
+  printFeed(newFeed, userDB);
 }
 
 export async function runCommand(
