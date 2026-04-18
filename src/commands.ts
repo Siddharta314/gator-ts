@@ -7,7 +7,7 @@ import {
 } from "./db/queries/users.js";
 import { config } from "./config.js";
 import { fetchFeed, printFeed } from "./rssfeed.js";
-import { createFeed } from "./db/queries/feeds.js";
+import { createFeed, getFeedsWithUserName } from "./db/queries/feeds.js";
 
 export type CommandHandler = (
   cmdName: string,
@@ -83,6 +83,19 @@ export async function handlerAddFeed(cmd: string, ...args: string[]) {
   const [feedName, feedUrl] = args;
   const newFeed = await createFeed(feedName, feedUrl, userDB.id);
   printFeed(newFeed, userDB);
+}
+
+export async function handlerListFeeds(cmd: string, ...args: string[]) {
+  // const feeds: Feed[] = await getFeeds();
+  // for (const feed of feeds) {
+  //   const user = await getUserByID(feed.userId);
+  //   console.log(`  ${feed.name} (${feed.url}) - ${user.name}`);
+  // }
+  const results = await getFeedsWithUserName();
+  for (const r of results) {
+    const feed = `${r.feeds.name} (${r.feeds.url})`;
+    console.log(`${feed.padEnd(50)} - ${r.users.name}`);
+  }
 }
 
 export async function runCommand(

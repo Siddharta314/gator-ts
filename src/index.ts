@@ -8,6 +8,7 @@ import {
   runCommand,
   handlerAgg,
   handlerAddFeed,
+  handlerListFeeds,
 } from "./commands.js";
 
 async function main() {
@@ -18,6 +19,7 @@ async function main() {
   registerCommand(commanderRegistry, "users", handlerListUsers);
   registerCommand(commanderRegistry, "agg", handlerAgg);
   registerCommand(commanderRegistry, "addfeed", handlerAddFeed);
+  registerCommand(commanderRegistry, "feeds", handlerListFeeds);
 
   const args = process.argv.slice(2);
   try {
