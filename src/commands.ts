@@ -11,6 +11,7 @@ import {
   createFeed,
   createFeedFollow,
   getFeedByUrl,
+  getFeedFollowsForUser,
   getFeedsWithUserName,
 } from "./db/queries/feeds.js";
 
@@ -117,9 +118,24 @@ export async function handlerFeedFollow(cmd: string, ...args: string[]) {
   if (!feed) {
     throw new Error("Feed not found");
   }
+  try {
+    const result = await createFeedFollow(user.id, feed.id);
+    console.log(`Followed ${result.feedName} by ${result.userName}`);
+  } catch (error) {
+    console.error(error);
+  }
+}
 
-  const result = await createFeedFollow(feed.id, user.id);
-  console.log(`Followed ${result.feedName} by ${result.userName}`);
+export async function handlerFollowing(cmd: string, ...args: string[]) {
+  const user = await getUserByName(config.currentUserName);
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  const results = await getFeedFollowsForUser(user.name);
+  for (const r of results) {
+    console.log(`${r.feedName} (${r.userName})`);
+  }
 }
 
 export async function runCommand(

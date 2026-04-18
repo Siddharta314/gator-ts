@@ -51,3 +51,23 @@ export async function createFeedFollow(userId: string, feedId: string) {
 
   return result;
 }
+
+export async function getFeedFollowsForUser(username: string) {
+  // const results = await db
+  //   .select()
+  //   .from(feed_follows)
+  //   .innerJoin(feeds, eq(feed_follows.feedId, feeds.id))
+  //   .innerJoin(users, eq(feed_follows.userId, users.id))
+  //   .where(eq(users.name, username));
+  // return results;
+  return await db
+    .select({
+      id: feed_follows.id,
+      feedName: feeds.name,
+      userName: users.name,
+    })
+    .from(feed_follows)
+    .innerJoin(feeds, eq(feed_follows.feedId, feeds.id))
+    .innerJoin(users, eq(feed_follows.userId, users.id))
+    .where(eq(users.name, username));
+}

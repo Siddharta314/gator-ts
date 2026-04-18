@@ -10,6 +10,7 @@ import {
   handlerAddFeed,
   handlerListFeeds,
   handlerFeedFollow,
+  handlerFollowing,
 } from "./commands.js";
 
 async function main() {
@@ -22,6 +23,7 @@ async function main() {
   registerCommand(commanderRegistry, "addfeed", handlerAddFeed);
   registerCommand(commanderRegistry, "feeds", handlerListFeeds);
   registerCommand(commanderRegistry, "follow", handlerFeedFollow);
+  registerCommand(commanderRegistry, "following", handlerFollowing);
 
   const args = process.argv.slice(2);
   try {
