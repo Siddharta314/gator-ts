@@ -89,6 +89,9 @@ export async function handlerAddFeed(cmd: string, ...args: string[]) {
   const [feedName, feedUrl] = args;
   const newFeed = await createFeed(feedName, feedUrl, userDB.id);
   printFeed(newFeed, userDB);
+
+  const result = await createFeedFollow(userDB.id, newFeed.id);
+  console.log(`Followed ${result.feedName} by ${result.userName}`);
 }
 
 export async function handlerListFeeds(cmd: string, ...args: string[]) {
