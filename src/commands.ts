@@ -4,6 +4,7 @@ import {
   getUserByName,
   deleteAllUsers,
   getUsers,
+  User,
 } from "./db/queries/users.js";
 import { config } from "./config.js";
 import { fetchFeed, printFeed } from "./rssfeed.js";
@@ -14,6 +15,7 @@ import {
   getFeedFollowsForUser,
   getFeedsWithUserName,
 } from "./db/queries/feeds.js";
+import { type UserCommandHandler } from "./middleware.js";
 
 export type CommandHandler = (
   cmdName: string,
@@ -77,22 +79,17 @@ export async function handlerAgg(cmd: string, ...args: string[]) {
   console.log(JSON.stringify(rssFeed, null, 2));
 }
 
-export async function handlerAddFeed(cmd: string, ...args: string[]) {
+export const handlerAddFeed: UserCommandHandler = async (_, user, ...args) => {
   if (args.length !== 2) {
     throw new Error("Usage: add-feed <name> <url>");
   }
-  const currentUser = config.currentUserName;
-  const userDB = await getUserByName(currentUser);
-  if (!userDB) {
-    throw new Error("User not found");
-  }
   const [feedName, feedUrl] = args;
-  const newFeed = await createFeed(feedName, feedUrl, userDB.id);
-  printFeed(newFeed, userDB);
+  const newFeed = await createFeed(feedName, feedUrl, user.id);
+  printFeed(newFeed, user);
 
-  const result = await createFeedFollow(userDB.id, newFeed.id);
+  const result = await createFeedFollow(user.id, newFeed.id);
   console.log(`Followed ${result.feedName} by ${result.userName}`);
-}
+};
 
 export async function handlerListFeeds(cmd: string, ...args: string[]) {
   // const feeds: Feed[] = await getFeeds();
@@ -107,15 +104,15 @@ export async function handlerListFeeds(cmd: string, ...args: string[]) {
   }
 }
 
-export async function handlerFeedFollow(cmd: string, ...args: string[]) {
+export const handlerFeedFollow: UserCommandHandler = async (
+  _,
+  user,
+  ...args
+) => {
   if (args.length !== 1) {
     throw new Error("Usage: follow <feedUrl>");
   }
   const feedUrl = args[0];
-  const user = await getUserByName(config.currentUserName);
-  if (!user) {
-    throw new Error("User not found");
-  }
 
   const feed = await getFeedByUrl(feedUrl);
   if (!feed) {
@@ -127,19 +124,18 @@ export async function handlerFeedFollow(cmd: string, ...args: string[]) {
   } catch (error) {
     console.error(error);
   }
-}
+};
 
-export async function handlerFollowing(cmd: string, ...args: string[]) {
-  const user = await getUserByName(config.currentUserName);
-  if (!user) {
-    throw new Error("User not found");
-  }
-
+export const handlerFollowing: UserCommandHandler = async (
+  _,
+  user,
+  ...args
+) => {
   const results = await getFeedFollowsForUser(user.name);
   for (const r of results) {
     console.log(`${r.feedName} (${r.userName})`);
   }
-}
+};
 
 export async function runCommand(
   registry: CommandsRegistry,

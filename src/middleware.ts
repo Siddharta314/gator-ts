@@ -3,7 +3,7 @@ import { User } from "./db/queries/users.js";
 import { config } from "./config.js";
 import { getUserByName } from "./db/queries/users.js";
 
-type UserCommandHandler = (
+export type UserCommandHandler = (
   cmdName: string,
   user: User,
   ...args: string[]
