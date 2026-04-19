@@ -11,6 +11,7 @@ import { fetchFeed, printFeed } from "./rssfeed.js";
 import {
   createFeed,
   createFeedFollow,
+  deleteFeedFollow,
   getFeedByUrl,
   getFeedFollowsForUser,
   getFeedsWithUserName,
@@ -135,6 +136,20 @@ export const handlerFollowing: UserCommandHandler = async (
   for (const r of results) {
     console.log(`${r.feedName} (${r.userName})`);
   }
+};
+
+export const handlerUnfollow: UserCommandHandler = async (_, user, ...args) => {
+  if (args.length !== 1) {
+    throw new Error("Usage: unfollow <feedUrl>");
+  }
+  const url = args[0];
+  const deletedRecord = await deleteFeedFollow(user.id, url);
+  if (!deletedRecord) {
+    throw new Error(
+      `Could not unfollow: You aren't following a feed with URL '${url}'`,
+    );
+  }
+  console.log(`Unfollowed ${url} by ${user.name}`);
 };
 
 export async function runCommand(
