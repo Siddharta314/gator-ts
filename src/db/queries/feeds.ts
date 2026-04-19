@@ -1,6 +1,6 @@
 import { db } from "../index.js";
 import { feeds, users, feed_follows } from "../schema.js";
-import { and, eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 
 export async function createFeed(name: string, url: string, userId: string) {
   const [result] = await db
@@ -100,4 +100,27 @@ export async function deleteFeedFollow(userId: string, feedUrl: string) {
     .returning();
 
   return result[0];
+}
+
+export async function markFeedFetched(feedId: string) {
+  const [result] = await db
+    .update(feeds)
+    .set({
+      lastFetchedAt: new Date(),
+      updatedAt: new Date(), // Opcional si tienes $onUpdate en el schema
+    })
+    .where(eq(feeds.id, feedId))
+    .returning();
+
+  return result;
+}
+
+export async function getNextFeedToFetch() {
+  const [result] = await db
+    .select()
+    .from(feeds)
+    .orderBy(sql`${feeds.lastFetchedAt} ASC NULLS FIRST`)
+    .limit(1);
+
+  return result;
 }
