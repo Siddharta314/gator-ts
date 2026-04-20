@@ -90,9 +90,14 @@ export async function scrapeFeeds() {
     const rssData = await fetchFeed(feed.url);
     // console.log("--- RSS DATA STRUCTURE ---");
     // console.log(JSON.stringify(rssData, null, 2));
-    for (const item of rssData?.channel?.item || []) {
+    const items = rssData?.channel?.item || [];
+    const itemsArray = Array.isArray(items) ? items : [items];
+    for (const item of itemsArray) {
       console.log(item.title);
     }
+    console.log(
+      `✅ Successfully scraped ${itemsArray.length} posts from ${feed.name}`,
+    );
   } catch (error) {
     console.error(`❌ Error scraping feed "${feed.name}":`, error);
   }

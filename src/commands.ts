@@ -7,7 +7,7 @@ import {
   User,
 } from "./db/queries/users.js";
 import { config } from "./config.js";
-import { fetchFeed, printFeed } from "./rssfeed.js";
+import { fetchFeed, printFeed, scrapeFeeds } from "./rssfeed.js";
 import {
   createFeed,
   createFeedFollow,
@@ -75,9 +75,29 @@ export async function handlerListUsers(cmd: string, ...args: string[]) {
 }
 
 export async function handlerAgg(cmd: string, ...args: string[]) {
-  console.log("Fetching resource");
-  const rssFeed = await fetchFeed("https://www.wagslane.dev/index.xml");
-  console.log(JSON.stringify(rssFeed, null, 2));
+  if (args.length !== 1) {
+    throw new Error("Usage: agg <time_between_reqs>, ex: 1s, 1m, 1h");
+  }
+  const regex = /^(\d+)(ms|s|m|h)$/;
+  const match = args[0].match(regex);
+
+  if (!match) {
+    throw new Error("Invalid time format. Use something like 1s, 5m, or 2h");
+  }
+  console.log(`Collecting feeds every ${match[0]}${match[1]}`);
+
+  const milliseconds = convertToMilliseconds(match);
+  await runScrapeCycle();
+  const interval = setInterval(async () => {
+    await runScrapeCycle();
+  }, milliseconds);
+  await new Promise<void>((resolve) => {
+    process.on("SIGINT", () => {
+      console.log("\nShutting down feed aggregator...");
+      clearInterval(interval);
+      resolve();
+    });
+  });
 }
 
 export const handlerAddFeed: UserCommandHandler = async (_, user, ...args) => {
@@ -162,4 +182,30 @@ export async function runCommand(
     throw new Error(`Command ${cmdName} not found`);
   }
   await handler(cmdName, ...args);
+}
+
+async function runScrapeCycle() {
+  try {
+    await scrapeFeeds();
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    console.error(`❌ [${new Date().toLocaleTimeString()}] Error: ${msg}`);
+  }
+}
+
+function convertToMilliseconds(match: RegExpMatchArray): number {
+  const [, value, unit] = match;
+  const num = parseInt(value);
+  switch (unit) {
+    case "ms":
+      return num;
+    case "s":
+      return num * 1000;
+    case "m":
+      return num * 60 * 1000;
+    case "h":
+      return num * 60 * 60 * 1000;
+    default:
+      throw new Error(`Unknown time unit: ${unit}`);
+  }
 }

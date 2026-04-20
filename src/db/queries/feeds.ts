@@ -107,7 +107,7 @@ export async function markFeedFetched(feedId: string) {
     .update(feeds)
     .set({
       lastFetchedAt: new Date(),
-      updatedAt: new Date(), // Opcional si tienes $onUpdate en el schema
+      updatedAt: new Date(),
     })
     .where(eq(feeds.id, feedId))
     .returning();
