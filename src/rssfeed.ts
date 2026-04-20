@@ -5,6 +5,7 @@ import {
   getNextFeedToFetch,
   markFeedFetched,
 } from "./db/queries/feeds.js";
+import { createPost } from "./db/queries/posts.js";
 
 type RSSFeed = {
   channel: {
@@ -94,6 +95,21 @@ export async function scrapeFeeds() {
     const itemsArray = Array.isArray(items) ? items : [items];
     for (const item of itemsArray) {
       console.log(item.title);
+      let publishedAt: Date | null = null;
+      if (item.pubDate) {
+        const date = new Date(item.pubDate);
+        if (!isNaN(date.getTime())) {
+          publishedAt = date;
+        }
+      }
+
+      await createPost({
+        title: item.title || "Untitled Post",
+        url: item.link || "",
+        description: item.description || null,
+        publishedAt: publishedAt,
+        feedId: feed.id,
+      });
     }
     console.log(
       `✅ Successfully scraped ${itemsArray.length} posts from ${feed.name}`,
