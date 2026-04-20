@@ -94,7 +94,7 @@ export async function scrapeFeeds() {
     const items = rssData?.channel?.item || [];
     const itemsArray = Array.isArray(items) ? items : [items];
     for (const item of itemsArray) {
-      console.log(item.title);
+      // console.log(item.title);
       let publishedAt: Date | null = null;
       if (item.pubDate) {
         const date = new Date(item.pubDate);

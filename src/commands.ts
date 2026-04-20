@@ -17,6 +17,7 @@ import {
   getFeedsWithUserName,
 } from "./db/queries/feeds.js";
 import { type UserCommandHandler } from "./middleware.js";
+import { getPostsForUser } from "./db/queries/posts.js";
 
 export type CommandHandler = (
   cmdName: string,
@@ -84,7 +85,7 @@ export async function handlerAgg(cmd: string, ...args: string[]) {
   if (!match) {
     throw new Error("Invalid time format. Use something like 1s, 5m, or 2h");
   }
-  console.log(`Collecting feeds every ${match[0]}${match[1]}`);
+  console.log(`Collecting feeds every ${args[0]}`);
 
   const milliseconds = convertToMilliseconds(match);
   await runScrapeCycle();
@@ -170,6 +171,40 @@ export const handlerUnfollow: UserCommandHandler = async (_, user, ...args) => {
     );
   }
   console.log(`Unfollowed ${url} by ${user.name}`);
+};
+
+export const handlerBrowse: UserCommandHandler = async (cmd, user, ...args) => {
+  let limit = 2;
+
+  if (args.length > 0) {
+    const parsedLimit = parseInt(args[0]);
+    if (isNaN(parsedLimit) || parsedLimit <= 0) {
+      throw new Error("Invalid limit. Please provide a positive number.");
+    }
+    limit = parsedLimit;
+  }
+
+  const posts = await getPostsForUser(user.id, limit);
+
+  if (posts.length === 0) {
+    console.log(
+      "No posts found. Try following some feeds first with the 'follow' command!",
+    );
+    return;
+  }
+
+  console.log(`\nListing the latest ${posts.length} posts for ${user.name}:`);
+  console.log("=".repeat(50));
+
+  posts.forEach((post) => {
+    console.log(`Title:       ${post.title}`);
+    console.log(`Source:      ${post.feedName}`); // Gracias al join en la query
+    console.log(
+      `Published:   ${post.publishedAt?.toLocaleString() || "Unknown Date"}`,
+    );
+    console.log(`Link:        ${post.url}`);
+    console.log("-".repeat(50));
+  });
 };
 
 export async function runCommand(
